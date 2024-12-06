@@ -193,6 +193,23 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+-- Toggling git diff between current branch and main
+-- Keep track of the original buffer
+local original_buffer = nil
+
+vim.keymap.set('n', '<leader>gm', function()
+  if vim.wo.diff then
+    vim.cmd 'only'
+    -- Return to original buffer if it exists
+    if original_buffer and vim.api.nvim_buf_is_valid(original_buffer) then
+      vim.api.nvim_set_current_buf(original_buffer)
+    end
+  else
+    -- Store current buffer before diffing
+    original_buffer = vim.api.nvim_get_current_buf()
+    vim.cmd 'Gvdiffsplit main:%'
+  end
+end, { desc = 'Toggle git diff with main' })
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -923,6 +940,9 @@ require('lazy').setup({
         additional_vim_regex_highlighting = { 'ruby' },
       },
       indent = { enable = true, disable = { 'ruby' } },
+    },
+    { -- View git diffs
+      'tpope/vim-fugitive',
     },
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
